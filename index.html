@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concepts</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,sans-serif;background:#fff;height:100vh;display:flex;flex-direction:column}
+header{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #eee}
+.viewport{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:.3s;pointer-events:none;padding:20px}
+.slide.active{opacity:1;pointer-events:auto}
+.slide img{max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 8px 40px rgba(0,0,0,.08)}
+.dots{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px;padding:8px 14px;background:rgba(255,255,255,.9);border-radius:100px;border:1px solid #eee}
+.dot{width:6px;height:6px;border-radius:50%;background:#ddd;cursor:pointer}
+.dot.active{background:#111;width:20px}
+</style></head><body>
+<header><h1 id="t" style="font-size:12px;letter-spacing:.12em;text-transform:uppercase">Concepts</h1><span id="c" style="color:#888;font-size:13px"></span></header>
+<div class="viewport" id="vp"><div class="dots" id="dots"></div></div>
+<script>
+let imgs=[],cur=0;
+async function load(){try{let r=await fetch('./images/manifest.json');let d=await r.json();imgs=Array.isArray(d)?d:d.images||[];document.getElementById('t').textContent=d.title||'Concepts';render()}catch(e){document.getElementById('vp').innerHTML='<div style=text-align:center;padding:40px>Add images/manifest.json</div>'}}
+function render(){let vp=document.getElementById('vp'),dots=document.getElementById('dots');vp.querySelectorAll('.slide').forEach(e=>e.remove());dots.innerHTML='';imgs.forEach((s,i)=>{let sl=document.createElement('div');sl.className='slide'+(i==cur?' active':'');let im=document.createElement('img');im.src='./images/'+s;sl.appendChild(im);sl.onclick=()=>go(cur+1);vp.appendChild(sl);let d=document.createElement('div');d.className='dot'+(i==cur?' active':'');d.onclick=()=>go(i);dots.appendChild(d)});upd()}
+function upd(){document.getElementById('c').textContent=(cur+1)+' / '+imgs.length;document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i==cur));document.querySelectorAll('.slide').forEach((s,i)=>s.classList.toggle('active',i==cur))}
+function go(n){cur=(n+imgs.length)%imgs.length;upd()}
+document.addEventListener('keydown',e=>{if(e.key=='ArrowRight')go(cur+1);if(e.key=='ArrowLeft')go(cur-1)});
+let sx=0;vp.addEventListener('touchstart',e=>sx=e.touches[0].clientX,{passive:true});vp.addEventListener('touchend',e=>{let dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>40)dx<0?go(cur+1):go(cur-1)},{passive:true});
+load();
+</script></body></html>
